@@ -7,6 +7,10 @@ const {
   updateCanvas,
   deleteCanvas,
 } = require('../controllers/canvasController');
+const { optionalAuth } = require('../middleware/authMiddleware');
+
+// Apply optionalAuth to all canvas routes so logged-in users get ownership & filtering
+router.use(optionalAuth);
 
 router.route('/')
   .post(createCanvas)

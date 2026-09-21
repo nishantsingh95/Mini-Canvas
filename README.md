@@ -55,6 +55,15 @@ A full-stack Mini Design Canvas web application built with **Next.js 14**, **Rea
 - Export high-resolution PNG image directly to your computer.
 - Export canvas data as JSON.
 
+### 5. Authentication & Access Control (JWT + Bcrypt)
+- **User Authentication**: Secure Sign In and Registration powered by JSON Web Tokens (JWT) and Bcrypt password hashing.
+- **Canvas Ownership & Privacy**:
+  - Save designs privately to your personal user account.
+  - Optional Public toggle: share read access with anyone.
+  - Filter canvases in modal: "All Canvases", "My Canvases", or "Public Canvases".
+  - Full access control: only authors can edit or delete their own canvases.
+- **Persistent Sessions**: Automatic token hydration via `localStorage` and verification against `/api/auth/me`.
+
 ---
 
 ## Getting Started

@@ -6,6 +6,7 @@ import Toolbar from '@/components/UI/Toolbar';
 import PropertiesPanel from '@/components/UI/PropertiesPanel';
 import LayersPanel from '@/components/UI/LayersPanel';
 import CanvasModal from '@/components/UI/CanvasModal';
+import AuthModal from '@/components/UI/AuthModal';
 import Toast from '@/components/UI/Toast';
 import CanvasContainer from '@/components/Canvas/CanvasContainer';
 import { useCanvasHistory } from '@/hooks/useCanvasHistory';
@@ -111,6 +112,7 @@ export default function CanvasPage() {
   const [canvasId, setCanvasId] = useState(null);
   const [canvasName, setCanvasName] = useState('Clean 3D Canvas');
   const [canvasBg, setCanvasBg] = useState('#f8fafc');
+  const [canvasIsPublic, setCanvasIsPublic] = useState(false);
   const [canvasWidth] = useState(1200);
   const [canvasHeight] = useState(800);
 
@@ -332,6 +334,7 @@ export default function CanvasPage() {
     setCanvasId(null);
     setCanvasName('New Design Canvas');
     setCanvasBg('#ffffff');
+    setCanvasIsPublic(false);
     resetHistory([]);
     setSelectedId(null);
     setSaveStatus('saved');
@@ -343,7 +346,7 @@ export default function CanvasPage() {
     setModalState({ isOpen: true, mode: 'save' });
   };
 
-  const handleSaveSubmit = async (name) => {
+  const handleSaveSubmit = async (name, isPublic = false) => {
     setSaveStatus('saving');
     setModalState({ isOpen: false, mode: 'save' });
 
@@ -353,18 +356,21 @@ export default function CanvasPage() {
       height: canvasHeight,
       backgroundColor: canvasBg,
       elements,
+      isPublic: Boolean(isPublic),
     };
 
     try {
       if (canvasId) {
         await api.updateCanvas(canvasId, payload);
         setCanvasName(payload.name);
+        setCanvasIsPublic(Boolean(isPublic));
         setSaveStatus('saved');
         notify('Canvas updated in cloud database!', 'success');
       } else {
         const created = await api.createCanvas(payload);
         setCanvasId(created.id || created._id);
         setCanvasName(payload.name);
+        setCanvasIsPublic(Boolean(isPublic));
         setSaveStatus('saved');
         notify('New canvas saved to MongoDB!', 'success');
       }
@@ -383,6 +389,7 @@ export default function CanvasPage() {
       setCanvasId(loaded.id || loaded._id);
       setCanvasName(loaded.name || 'Untitled Canvas');
       setCanvasBg(loaded.backgroundColor || '#ffffff');
+      setCanvasIsPublic(Boolean(loaded.isPublic));
       resetHistory(loaded.elements || []);
       setSelectedId(null);
       setSaveStatus('saved');
@@ -599,6 +606,11 @@ export default function CanvasPage() {
                 setCanvasBg(bg);
                 markDirty();
               }}
+              isPublic={canvasIsPublic}
+              onTogglePublic={(val) => {
+                setCanvasIsPublic(val);
+                markDirty();
+              }}
             />
           ) : (
             <LayersPanel
@@ -620,11 +632,15 @@ export default function CanvasPage() {
         mode={modalState.mode}
         onClose={() => setModalState({ isOpen: false, mode: 'save' })}
         canvasName={canvasName}
+        initialIsPublic={canvasIsPublic}
         onSaveSubmit={handleSaveSubmit}
         onLoadCanvas={handleLoadCanvas}
         elementsCount={elements.length}
         onNotify={notify}
       />
+
+      {/* Authentication Modal */}
+      <AuthModal onNotify={notify} />
 
       {/* Floating 3D Toasts */}
       <Toast toasts={toasts} onDismiss={dismissToast} />

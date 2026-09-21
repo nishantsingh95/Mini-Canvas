@@ -3,12 +3,12 @@ const Canvas = require('../models/Canvas');
 
 // @desc    Create a new canvas
 // @route   POST /api/canvases
-// @access  Public
+// @access  Public / Authenticated
 exports.createCanvas = async (req, res, next) => {
   try {
-    const { name, width, height, backgroundColor, elements, thumbnail, description } = req.body;
+    const { name, width, height, backgroundColor, elements, thumbnail, description, isPublic } = req.body;
 
-    const canvas = await Canvas.create({
+    const canvasData = {
       name: name || 'Untitled Canvas',
       width: width || 1200,
       height: height || 800,
@@ -16,7 +16,15 @@ exports.createCanvas = async (req, res, next) => {
       elements: Array.isArray(elements) ? elements : [],
       thumbnail: thumbnail || '',
       description: description || '',
-    });
+      isPublic: Boolean(isPublic),
+    };
+
+    // Attach user as owner if logged in
+    if (req.user) {
+      canvasData.owner = req.user._id;
+    }
+
+    const canvas = await Canvas.create(canvasData);
 
     res.status(201).json({
       success: true,
@@ -28,13 +36,33 @@ exports.createCanvas = async (req, res, next) => {
   }
 };
 
-// @desc    Get all canvases (metadata summary for list view)
+// @desc    Get canvases (filtered by owner if authenticated)
 // @route   GET /api/canvases
-// @access  Public
+// @access  Public / Authenticated
 exports.getAllCanvases = async (req, res, next) => {
   try {
-    const canvases = await Canvas.find()
-      .select('name width height backgroundColor thumbnail createdAt updatedAt elements')
+    let query = {};
+
+    if (req.user) {
+      // Authenticated user: show their own canvases + any public ones
+      query = {
+        $or: [
+          { owner: req.user._id },
+          { isPublic: true },
+        ],
+      };
+    } else {
+      // Guest: show unowned or public canvases
+      query = {
+        $or: [
+          { owner: null },
+          { isPublic: true },
+        ],
+      };
+    }
+
+    const canvases = await Canvas.find(query)
+      .select('name width height backgroundColor thumbnail createdAt updatedAt elements owner isPublic')
       .sort({ updatedAt: -1 });
 
     const formatted = canvases.map((canvas) => ({
@@ -45,6 +73,9 @@ exports.getAllCanvases = async (req, res, next) => {
       backgroundColor: canvas.backgroundColor,
       elementCount: canvas.elements ? canvas.elements.length : 0,
       thumbnail: canvas.thumbnail,
+      owner: canvas.owner,
+      isOwnedByMe: req.user ? canvas.owner?.toString() === req.user._id.toString() : !canvas.owner,
+      isPublic: canvas.isPublic,
       createdAt: canvas.createdAt,
       updatedAt: canvas.updatedAt,
     }));
@@ -61,7 +92,7 @@ exports.getAllCanvases = async (req, res, next) => {
 
 // @desc    Get single canvas by ID
 // @route   GET /api/canvases/:id
-// @access  Public
+// @access  Public / Authenticated
 exports.getCanvasById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -82,6 +113,18 @@ exports.getCanvasById = async (req, res, next) => {
       });
     }
 
+    // Access control: if canvas has owner and isn't public, verify requester is owner
+    if (
+      canvas.owner &&
+      !canvas.isPublic &&
+      (!req.user || canvas.owner.toString() !== req.user._id.toString())
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to view this canvas',
+      });
+    }
+
     res.status(200).json({
       success: true,
       data: canvas,
@@ -93,7 +136,7 @@ exports.getCanvasById = async (req, res, next) => {
 
 // @desc    Update an existing canvas
 // @route   PUT /api/canvases/:id
-// @access  Public
+// @access  Public / Authenticated
 exports.updateCanvas = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -105,21 +148,7 @@ exports.updateCanvas = async (req, res, next) => {
       });
     }
 
-    const { name, width, height, backgroundColor, elements, thumbnail, description } = req.body;
-
-    const updateData = {};
-    if (name !== undefined) updateData.name = name;
-    if (width !== undefined) updateData.width = width;
-    if (height !== undefined) updateData.height = height;
-    if (backgroundColor !== undefined) updateData.backgroundColor = backgroundColor;
-    if (elements !== undefined) updateData.elements = elements;
-    if (thumbnail !== undefined) updateData.thumbnail = thumbnail;
-    if (description !== undefined) updateData.description = description;
-
-    const canvas = await Canvas.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    const canvas = await Canvas.findById(id);
 
     if (!canvas) {
       return res.status(404).json({
@@ -127,6 +156,35 @@ exports.updateCanvas = async (req, res, next) => {
         message: `Canvas with ID ${id} not found`,
       });
     }
+
+    // Access control: if canvas has owner, only owner can update
+    if (
+      canvas.owner &&
+      (!req.user || canvas.owner.toString() !== req.user._id.toString())
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to modify this canvas',
+      });
+    }
+
+    // If canvas was previously unowned and a logged-in user saves it, claim ownership
+    if (!canvas.owner && req.user) {
+      canvas.owner = req.user._id;
+    }
+
+    const { name, width, height, backgroundColor, elements, thumbnail, description, isPublic } = req.body;
+
+    if (name !== undefined) canvas.name = name;
+    if (width !== undefined) canvas.width = width;
+    if (height !== undefined) canvas.height = height;
+    if (backgroundColor !== undefined) canvas.backgroundColor = backgroundColor;
+    if (elements !== undefined) canvas.elements = elements;
+    if (thumbnail !== undefined) canvas.thumbnail = thumbnail;
+    if (description !== undefined) canvas.description = description;
+    if (isPublic !== undefined) canvas.isPublic = isPublic;
+
+    await canvas.save();
 
     res.status(200).json({
       success: true,
@@ -140,7 +198,7 @@ exports.updateCanvas = async (req, res, next) => {
 
 // @desc    Delete a canvas
 // @route   DELETE /api/canvases/:id
-// @access  Public
+// @access  Public / Authenticated
 exports.deleteCanvas = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -152,7 +210,7 @@ exports.deleteCanvas = async (req, res, next) => {
       });
     }
 
-    const canvas = await Canvas.findByIdAndDelete(id);
+    const canvas = await Canvas.findById(id);
 
     if (!canvas) {
       return res.status(404).json({
@@ -160,6 +218,19 @@ exports.deleteCanvas = async (req, res, next) => {
         message: `Canvas with ID ${id} not found`,
       });
     }
+
+    // Access control: if canvas has owner, only owner can delete
+    if (
+      canvas.owner &&
+      (!req.user || canvas.owner.toString() !== req.user._id.toString())
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to delete this canvas',
+      });
+    }
+
+    await Canvas.findByIdAndDelete(id);
 
     res.status(200).json({
       success: true,

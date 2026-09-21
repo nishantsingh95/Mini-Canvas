@@ -10,6 +10,8 @@ import {
   Palette,
   Layers,
   RotateCw,
+  Globe,
+  Lock,
 } from 'lucide-react';
 
 const PRESET_PALETTE = [
@@ -32,6 +34,8 @@ export default function PropertiesPanel({
   onUpdateElement,
   canvasBg,
   onUpdateCanvasBg,
+  isPublic = false,
+  onTogglePublic,
 }) {
   if (!selectedElement) {
     return (
@@ -71,6 +75,37 @@ export default function PropertiesPanel({
               />
             ))}
           </div>
+
+          {onTogglePublic && (
+            <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {isPublic ? (
+                    <Globe size={16} color="var(--accent-emerald)" />
+                  ) : (
+                    <Lock size={16} color="var(--accent-primary)" />
+                  )}
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)' }}>
+                      {isPublic ? 'Public Canvas' : 'Private Canvas'}
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                      {isPublic ? 'Shared to everyone' : 'Only you can view'}
+                    </div>
+                  </div>
+                </div>
+
+                <label className="switch-toggle">
+                  <input
+                    type="checkbox"
+                    checked={isPublic}
+                    onChange={(e) => onTogglePublic(e.target.checked)}
+                  />
+                  <span className="slider-round" />
+                </label>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="prop-section">

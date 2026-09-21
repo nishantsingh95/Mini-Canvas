@@ -149,6 +149,16 @@ const CanvasSchema = new mongoose.Schema(
       default: '',
       maxlength: 500,
     },
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      index: true,
+      default: null,
+    },
+    isPublic: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
