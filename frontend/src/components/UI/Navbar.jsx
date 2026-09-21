@@ -30,6 +30,7 @@ export default function Navbar({
   onSave,
   onExportPNG,
   onExportJSON,
+  autoSaveEnabled = true,
 }) {
   const { user, isAuthenticated, logout, openAuthModal } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -76,9 +77,9 @@ export default function Navbar({
         <div className="status-pill">
           <div className={`status-dot ${saveStatus}`} />
           <span>
-            {saveStatus === 'saved' && 'Saved'}
+            {saveStatus === 'saved' && (autoSaveEnabled ? 'Autosaved' : 'Saved')}
             {saveStatus === 'unsaved' && 'Unsaved'}
-            {saveStatus === 'saving' && 'Saving...'}
+            {saveStatus === 'saving' && (autoSaveEnabled ? 'Autosaving...' : 'Saving...')}
           </span>
         </div>
       </div>

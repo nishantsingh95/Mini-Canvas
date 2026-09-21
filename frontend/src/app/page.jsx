@@ -149,10 +149,37 @@ export default function CanvasPage() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
+
   // Update save status whenever elements or metadata change
   const markDirty = useCallback(() => {
     setSaveStatus('unsaved');
   }, []);
+
+  // Autosave when canvas is modified and has a cloud ID
+  useEffect(() => {
+    if (!autoSaveEnabled || !canvasId || saveStatus !== 'unsaved') return;
+
+    const timer = setTimeout(async () => {
+      setSaveStatus('saving');
+      try {
+        await api.updateCanvas(canvasId, {
+          name: canvasName,
+          width: canvasWidth,
+          height: canvasHeight,
+          backgroundColor: canvasBg,
+          elements,
+          isPublic: canvasIsPublic,
+        });
+        setSaveStatus('saved');
+      } catch (err) {
+        console.warn('Autosave error:', err);
+        setSaveStatus('unsaved');
+      }
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [autoSaveEnabled, canvasId, saveStatus, canvasName, canvasWidth, canvasHeight, canvasBg, elements, canvasIsPublic]);
 
   // Add Rectangle
   const handleAddRectangle = useCallback(() => {
@@ -538,6 +565,7 @@ export default function CanvasPage() {
         onSave={handleOpenSaveModal}
         onExportPNG={handleExportPNG}
         onExportJSON={handleExportJSON}
+        autoSaveEnabled={autoSaveEnabled}
       />
 
       {/* Main Workspace Area */}
@@ -610,6 +638,11 @@ export default function CanvasPage() {
               onTogglePublic={(val) => {
                 setCanvasIsPublic(val);
                 markDirty();
+              }}
+              autoSaveEnabled={autoSaveEnabled}
+              onToggleAutoSave={(val) => {
+                setAutoSaveEnabled(val);
+                notify(val ? 'Autosave enabled' : 'Autosave disabled', 'info');
               }}
             />
           ) : (

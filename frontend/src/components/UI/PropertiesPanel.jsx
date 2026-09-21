@@ -12,6 +12,7 @@ import {
   RotateCw,
   Globe,
   Lock,
+  RefreshCw,
 } from 'lucide-react';
 
 const PRESET_PALETTE = [
@@ -36,6 +37,8 @@ export default function PropertiesPanel({
   onUpdateCanvasBg,
   isPublic = false,
   onTogglePublic,
+  autoSaveEnabled = true,
+  onToggleAutoSave,
 }) {
   if (!selectedElement) {
     return (
@@ -76,6 +79,7 @@ export default function PropertiesPanel({
             ))}
           </div>
 
+          {/* Visibility Setting */}
           {onTogglePublic && (
             <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid #e2e8f0' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -100,6 +104,34 @@ export default function PropertiesPanel({
                     type="checkbox"
                     checked={isPublic}
                     onChange={(e) => onTogglePublic(e.target.checked)}
+                  />
+                  <span className="slider-round" />
+                </label>
+              </div>
+            </div>
+          )}
+
+          {/* Autosave Setting */}
+          {onToggleAutoSave && (
+            <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <RefreshCw size={16} color={autoSaveEnabled ? 'var(--accent-emerald)' : 'var(--text-muted)'} />
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)' }}>
+                      Autosave to Cloud
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                      {autoSaveEnabled ? 'Syncs 2s after edits' : 'Manual save only'}
+                    </div>
+                  </div>
+                </div>
+
+                <label className="switch-toggle">
+                  <input
+                    type="checkbox"
+                    checked={autoSaveEnabled}
+                    onChange={(e) => onToggleAutoSave(e.target.checked)}
                   />
                   <span className="slider-round" />
                 </label>
