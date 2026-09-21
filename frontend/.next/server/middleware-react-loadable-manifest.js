@@ -1,0 +1,1 @@
+self.__REACT_LOADABLE_MANIFEST="{\"components\\\\Canvas\\\\CanvasContainer.jsx -> ./StageCanvas\":{\"id\":\"components\\\\Canvas\\\\CanvasContainer.jsx -> ./StageCanvas\",\"files\":[\"static/chunks/_app-pages-browser_src_components_Canvas_StageCanvas_jsx.js\"]}}"
