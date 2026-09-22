@@ -29,6 +29,14 @@ app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use(morgan('dev'));
 
 // API Routes
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'Mini Design Canvas API is running',
+    health: '/api/health',
+  });
+});
+
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
