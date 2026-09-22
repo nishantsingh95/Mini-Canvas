@@ -2,6 +2,10 @@
 
 This guide explains how to deploy **Mini Design Canvas** to **Render** (Backend API) and **Vercel** (Next.js Frontend) using MongoDB Atlas.
 
+### 🚀 Active Deployments
+- **Live Frontend Application**: [https://mini-canvas-five.vercel.app/](https://mini-canvas-five.vercel.app/)
+- **Live Backend REST API**: [https://mini-canvas-ylo9.onrender.com/](https://mini-canvas-ylo9.onrender.com/) (Status: [`/api/health`](https://mini-canvas-ylo9.onrender.com/api/health))
+
 ---
 
 ## Architecture Overview

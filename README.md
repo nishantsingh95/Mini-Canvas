@@ -2,6 +2,12 @@
 
 A full-stack Mini Design Canvas application built with **Next.js 14**, **React Konva**, **Node.js**, **Express**, and **MongoDB**, wrapped in a modern **Clean 3D tactile UI** design system.
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-mini--canvas--five.vercel.app-4f46e5?style=for-the-badge&logo=vercel&logoColor=white)](https://mini-canvas-five.vercel.app/)
+[![Backend API](https://img.shields.io/badge/Backend_API-Render_Live-46a3b8?style=for-the-badge&logo=render&logoColor=white)](https://mini-canvas-ylo9.onrender.com/api/health)
+
+- 🌐 **Live Application**: [https://mini-canvas-five.vercel.app/](https://mini-canvas-five.vercel.app/)
+- ⚡ **Backend API**: [https://mini-canvas-ylo9.onrender.com/](https://mini-canvas-ylo9.onrender.com/) (Health: [`/api/health`](https://mini-canvas-ylo9.onrender.com/api/health))
+
 ---
 
 ## Table of Contents
