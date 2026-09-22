@@ -37,17 +37,24 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/api/health', (req, res) => {
+const healthHandler = (req, res) => {
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     service: 'Mini Design Canvas API',
   });
-});
+};
 
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
+
+// Mount both with and without /api prefix for maximum deployment flexibility
+app.use('/auth', authRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/canvases', canvasRoutes);
 app.use('/api/canvases', canvasRoutes);
+
 
 // Catch 404 for undefined routes
 app.use('*', (req, res) => {

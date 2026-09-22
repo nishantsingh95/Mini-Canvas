@@ -1,5 +1,10 @@
 const rawApiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-const API_BASE = rawApiBase.replace(/\/+$/, '');
+let cleanApiBase = rawApiBase.replace(/\/+$/, '');
+if (!cleanApiBase.endsWith('/api')) {
+  cleanApiBase = `${cleanApiBase}/api`;
+}
+const API_BASE = cleanApiBase;
+
 
 const TOKEN_KEY = 'mini_canvas_jwt_token';
 const USER_KEY = 'mini_canvas_user_data';
