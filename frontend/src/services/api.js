@@ -1,4 +1,5 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const rawApiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE = rawApiBase.replace(/\/+$/, '');
 
 const TOKEN_KEY = 'mini_canvas_jwt_token';
 const USER_KEY = 'mini_canvas_user_data';
