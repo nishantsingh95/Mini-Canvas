@@ -179,9 +179,9 @@ npm run dev
 ### Backend (`backend/.env`)
 ```env
 PORT=5000
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/mini_design_canvas?retryWrites=true&w=majority
+MONGODB_URI=MongoDb url
 CLIENT_ORIGIN=http://localhost:3000
-JWT_SECRET=super_secret_mini_canvas_jwt_key_2026
+JWT_SECRET=JWT secret key
 JWT_EXPIRES_IN=7d
 ```
 
